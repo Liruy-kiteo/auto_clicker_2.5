@@ -12,6 +12,7 @@ tk.resizable(width=False, height=False)
 start = 0
 end = 0
 speed = 0
+click_button = 0
 
 # функции для выбора кнопки мыши, правая или левая. Если пользователь решил автоматически печатать букву то решение этому будет находиться в функции check_for_start_button()
 def Rmb():
@@ -38,21 +39,26 @@ def check_for_start_button():
     Entry_start.delete('1','end');Entry_Auto_button.delete('1','end');Entry_end.delete('1','end')
     MAIN_button.place_forget()
     start = Entry_start.get(); speed = Entry_speed.get(); end = Entry_end.get()
+    #блок с проверками 1
+    if start == '': start = "1"
+    if end == '': end = "2"
     #кнопка заместо кнопки подтвердить
     Main_disaple_button = Button(justify='center',font=('Comic Neue', 8),text=f'Перенастроить\n({start}) ({end})',width=20,height=4, command=disaple)
     Main_disaple_button.place(x = 276, y = 152)
 
-    #блок с проверками
+    #блок с проверками 2
     if Entry_Auto_button.get() != "":
         click_button = Entry_Auto_button.get()
     try:speed = int(speed)
     except:speed = 1
+    if click_button == 0: click_button = "left"
     #начало процесса кликов
 
 # функция в которой и происходит процесс кликов
 def clicker():
   #блок для кнопки старта
   while True:
+   time.sleep(0.1)
    if keyboard.is_pressed(start):
     time.sleep(0.3)
     #блок с самими кликами
