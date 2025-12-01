@@ -32,8 +32,8 @@ def disaple():
    Main_disable_button.place_forget()
    MAIN_button.place(x = 276, y = 152)
 
-# главная функция в которой идёт запись всех переменный, активируется по кнопке "подтвердить"
 def check_for_start_button():
+
     #глобализация переменных по коду
     global click_button; global end; global start; global speed; global Main_disable_button
 
@@ -58,6 +58,7 @@ def check_for_start_button():
     #начало процесса кликов
 
 # функция в которой и происходит процесс кликов
+# FIXME после работы функции , мышь начинает перемещатся очень медленно
 def clicker():
   #блок для кнопки старта
   while True:
@@ -94,9 +95,9 @@ def clicker():
 
 #изменение текста в приложение
 def function_start():
-   Label_function.configure(text='кнопка (l)-запись, \nкнопка (k)-остановка записи.\n Убедитесь, что вы ввели \nкнопку старта и остановки'); Label_function.place(x = 210, y = 10)
+   Label_function.configure(text='кнопка (l)-запись, \nкнопка (k)-остановка записи.'); Label_function.place(x = 210, y = 10)
    function_button_1.place_forget(); function_button_1.configure(command=change_function_text)
-   #будет выдавать ошибку, пока не знаю как это исправить
+   # FIXME: будет выдавать ошибку, пока не знаю как это исправить
    function.start()
 
 #прослушка мыши
@@ -105,11 +106,11 @@ def listen_mouse():
 
     #запись переменных
     Entry_start.delete('1','end');Entry_end.delete('1','end')
-    MAIN_button.place_forget()
     start_f = Entry_start.get();end_f = Entry_end.get()
     #блок с проверками 
     if start_f == '': start_f = "1"
     if end_f == '': end_f = "2"
+    MAIN_button.place_forget()
     #запись мыши
     global Buttons
     keyboard.wait('l')
@@ -124,8 +125,8 @@ def change_function_text():
    Label_function.configure(text=f'Функция в данный \nмомент включена,\n старт на {start_f}\n остановка на {end_f}\n(остановка \nработает только в \nконце \nкаждого повторение)'); Label_function.place(x=255)
    function_button_1.configure(text = 'Перенастроить',command=configure);function_button_1.place(x=290,y=170)
 
-#повторение мыши
 def function_work():
+
     while True:
        time.sleep(0.1)
        if keyboard.is_pressed(start_f):
@@ -134,9 +135,14 @@ def function_work():
              mouse.play(Buttons)
              if keyboard.is_pressed(end_f):
                 break
-             
-#возможность перенастройки
+    #    elif thread_closing == 1:
+    #       break
+          
+    
+thread_closing = 0  
 def configure():
+   global thread_closing
+   thead_closing=1
    global Buttons
    Buttons = []
    Label_function.place_forget()
@@ -144,13 +150,15 @@ def configure():
    MAIN_button.place(x = 276, y = 152)
    
 #включение альтернативных потоков
-function_working = threading.Thread(target=function_work);function_working.start()
+function_working = threading.Thread(target=function_work)
+function_working.start()
 function = threading.Thread(target=listen_mouse)
-main_clicker = threading.Thread(target=clicker);main_clicker.start()
+main_clicker = threading.Thread(target=clicker)
+main_clicker.start()
 
 # Основное наполнение программы, кнопки, текста, заголовки и т.д
 Title = Label(text='Автокликер',bg='#4E4D4D',fg='#ffffff',font=('Comic Neue', 24)); Title.place(x=30,y=14)
-Label_function = Label(text='Запустить функцию \nplay/record?',bg='#4E4D4D',fg='#ffffff',font=('Comic Neue', 12)); Label_function.place(x = 264, y = 38)
+Label_function = Label(text='Запустить функцию \nplay/record?\n(Введите кнопки\n начала и остановки)',bg='#4E4D4D',fg='#ffffff',font=('Comic Neue', 12)); Label_function.place(x = 255, y = 10)
 Entry_start = Entry(font=('Comic Neue', 16),width=2,justify='center'); Entry_start.place(x=12,y=61); Label_start = Label(text='Введите кнопку старта',bg='#4E4D4D',fg='#ffffff',font=('Comic Neue', 12)); Label_start.place(x = 40, y = 63)
 Entry_end = Entry(font=('Comic Neue', 16),width=2,justify='center'); Entry_end.place(x=12,y=101); Label_start = Label(text='Введите кнопку остановки',bg='#4E4D4D',fg='#ffffff',font=('Comic Neue', 12)); Label_start.place(x = 40, y = 103)
 Entry_speed = Entry(font=('Comic Neue', 16),width=2,justify='center'); Entry_speed.place(x=12,y=141); Label_start = Label(text='Введите скорость (кпс)',bg='#4E4D4D',fg='#ffffff',font=('Comic Neue', 12)); Label_start.place(x = 40, y = 143)
@@ -163,4 +171,4 @@ MAIN_button = Button(justify='center',font=('Comic Neue', 8),text='Запуст�
 
 # Функция благодаря которой эта программа работает
 
-tk.mainloop()
+tk.mainloop() 
