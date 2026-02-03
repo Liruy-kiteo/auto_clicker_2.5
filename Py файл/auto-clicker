@@ -1,4 +1,4 @@
-from tkinter import *;import sys;from pynput import mouse, keyboard; import threading
+from tkinter import *; from pynput import mouse,keyboard;import time ;import threading; from pynput.keyboard import Controller as Keyboard_controller, Key; from pynput.mouse import Button as Button_mouse, Controller as Mouse_controller
 #обозначение сетки
 root = Tk(className='Автокликер 3.0')
 root.geometry('457x570')
@@ -12,6 +12,8 @@ count = 3
 start = ''
 end = ''
 click_button = ''
+mouse_button = Mouse_controller()
+
 def mouse_write(x,y,button):
     global end
     global start
@@ -37,7 +39,17 @@ def listen_mouse():
     mouse_key.join()
 
 
-def keyboard_write(key,keycode):
+def mouse_for_cpstest():
+ with mouse.Listener(on_click=cps_test_mouse) as mouse_key:
+    mouse_key.join()
+   
+
+def listen_keyboard_for_cpstest():
+   with keyboard.Listener(on_press=cps_test_keyboard,suppress=True) as keyboard_key:
+      keyboard_key.join()
+
+
+def keyboard_write(key):
     global end;global start;global count ;global click_button
     if count == 0:
        start = key
@@ -51,13 +63,77 @@ def keyboard_write(key,keycode):
        click_button = key
        click_button_description.text.configure(text=f'клавиша\n{click_button}');click_button_description.text.place_configure(x=100,y=240)
        count = 3
-       print()
     return False
+
+
+def lmb_f():
+   global click_button
+   click_button = Button_mouse.left
+   lmb.button.configure(text='y');rmb.button.configure(text='n')
+   click_button_description.text.configure(text=f'клавиша\n{click_button}');click_button_description.text.place_configure(x=100,y=240)
+
+
+def rmb_f():
+   global click_button
+   click_button = Button_mouse.right
+   lmb.button.configure(text='n');rmb.button.configure(text='y')
+   click_button_description.text.configure(text=f'клавиша\n{click_button}');click_button_description.text.place_configure(x=100,y=240)
+
+
+def cps_test_change():
+   global cps   
+   global number
+   global clicks
+   cps = 0
+   number = 10
+   clicks = 0
+   global timer
+   while number != 0:
+    time.sleep(1)
+    cps_test_b.button.configure(text = f"{int(clicks)}({number})")
+    number = number - 1
+   cps = int(clicks)
+   return False
+
+
+def cps_test_mouse(x,y,button):
+ global clicks
+ print(click_button)
+ if button == click_button:
+    cps_test_b.button.configure(text = f"{int(clicks)}({number})")
+    clicks = clicks + 0.5
+ if number == 0:
+    cps_test_b.button.configure(text = f"кпс тест\n{click_button}/{cps}")
+    return False
+ 
+def cps_test_keyboard(key):
+ global clicks
+ if key == click_button:
+    cps_test_b.button.configure(text = f"{int(clicks)}({number})")
+    clicks = clicks + 0.5
+ if number == 0:
+    cps_test_b.button.configure(text = f"кпс тест\n{click_button}/{cps}")
+    return False
+ 
+
+#FIXME Пофиксить баг если нажать на кнопку во время программы, также разобраться с отображением кликов у счётчика, потом обязательно переписать формулы
+def cps_test_thread():
+   cps_listening = threading.Thread(target= mouse_for_cpstest)
+   cps_listening.start()
+   cps_listening.join
+   cps_listenin = threading.Thread(target= listen_keyboard_for_cpstest) 
+   cps_listenin.start()
+   cps_listenin.join
+   cps_change = threading.Thread(target= cps_test_change)
+   cps_change.start()
+   cps_change.join
+
 
 def listen_keyboard():
    with keyboard.Listener(on_press=keyboard_write,suppress=True) as keyboard_key:
       keyboard_key.join()
       
+
 def side_listen():
   global mouse_side_process; global keyboard_side_process
   mouse_side_process = threading.Thread(target=listen_mouse) 
@@ -70,20 +146,11 @@ def side_listen():
   keyboard_side_process.join
 
 def start_f():
-
- global count
- count = 0
- side_listen()
+ global count;count = 0;side_listen()
 def end_f():
-
- global count
- count = 1
- side_listen()
+ global count;count = 1;side_listen()
 def click_button_f():
-
- global count
- count = 2
- side_listen()
+ global count;count = 2;side_listen()
 #--------------------------------------------------------------------------------------------------
 
 #плейсхолдер пока не допишу функцию
@@ -129,15 +196,15 @@ class buttons:
 start_button=buttons(start_f,'',5,1);start_button.button.place(x=30,y=116)
 Stop_button=buttons(end_f,'',5,1);Stop_button.button.place(x=270,y=116)
 click_button_B=buttons(click_button_f,'',5,1);click_button_B.button.place(x=30,y=246)
-lmb=buttons(placeholder,f'n',1,1);lmb.button.place(x=30,y=208)
-rmb=buttons(placeholder,f'y',1,1);rmb.button.place(x=110,y=208)
+lmb=buttons(lmb_f,f'n',1,1);lmb.button.place(x=30,y=208)
+rmb=buttons(rmb_f,f'y',1,1);rmb.button.place(x=110,y=208)
 play_record_button=buttons(placeholder,f'spc',14,1);play_record_button.button.place(x=90,y=330)
 timer_start=buttons(placeholder,f'spc',9,1);timer_start.button.place(x=340,y=410)
-cps_test=buttons(placeholder,f'spc',18,5);cps_test.button.place(x=30,y=465)
+cps_test_b=buttons(cps_test_thread,f'кпс тест',18,5);cps_test_b.button.place(x=30,y=465)
 save_preset=buttons(placeholder,f'spc',15,2);save_preset.button.place(x=185,y=465)
 rebuild=buttons(placeholder,f'spc',15,2);rebuild.button.place(x=320,y=465)
 delete_button=buttons(placeholder,f'spc',15,2);delete_button.button.place(x=185,y=510)
-download=buttons(placeholder,f'spc',15,2);download.button.place(x=320,y=510)
+download=buttons(placeholder,f'включить\nавтокликер',15,2);download.button.place(x=320,y=510)
 
 
 Speed_Entry=Entry(text=f'spc',bg='black',fg='white',width=5);Speed_Entry.place(x=270,y=230)
